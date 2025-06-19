@@ -63,3 +63,5 @@ pids
 # temporary files
 *.tmp
 *.temp
+
+.vercel

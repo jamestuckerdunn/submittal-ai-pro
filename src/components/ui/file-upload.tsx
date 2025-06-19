@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
+import NextImage from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -209,7 +210,7 @@ export function FileUpload({
     const fileCategory = getFileCategory(file);
     switch (fileCategory) {
       case 'image':
-        return <Image className="h-4 w-4" />;
+        return <Image className="h-4 w-4" aria-hidden="true" />;
       case 'document':
         return <FileText className="h-4 w-4" />;
       default:
@@ -284,9 +285,11 @@ export function FileUpload({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3 flex-1">
                     {file.preview && file.type.startsWith('image/') ? (
-                      <img
+                      <NextImage
                         src={file.preview}
                         alt={`Preview of ${file.name}`}
+                        width={40}
+                        height={40}
                         className="h-10 w-10 rounded object-cover"
                       />
                     ) : (

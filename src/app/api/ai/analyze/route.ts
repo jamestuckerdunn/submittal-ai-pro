@@ -209,7 +209,11 @@ export async function POST(request: NextRequest) {
 }
 
 // Track usage for subscription management
-async function trackUsage(supabase: any, userId: string, cost: number) {
+async function trackUsage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  cost: number
+) {
   try {
     // Get current subscription
     const { data: subscription } = await supabase

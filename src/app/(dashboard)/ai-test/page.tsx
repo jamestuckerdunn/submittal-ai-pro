@@ -16,7 +16,7 @@ import { CheckCircle, XCircle, Clock, Play, RefreshCw } from 'lucide-react';
 interface AITestResult {
   success: boolean;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 

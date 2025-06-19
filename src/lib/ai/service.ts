@@ -13,16 +13,22 @@ import {
   DocumentAnalysisResult,
   AIModel,
   AIRequestOptions,
-  AIProcessingError,
   TokenLimitExceededError,
-  RateLimitError,
 } from '@/lib/types/ai';
 import { PROMPT_TEMPLATES } from './prompts';
 
 // AI Service Class
 export class AIService {
-  private client = createOpenRouterClient();
+  private client: ReturnType<typeof createOpenRouterClient> | null = null;
   private readonly maxRetries = 3;
+
+  // Lazy initialization of OpenRouter client
+  private getClient() {
+    if (!this.client) {
+      this.client = createOpenRouterClient();
+    }
+    return this.client;
+  }
 
   // Main Analysis Method
   async analyzeDocument(
@@ -50,7 +56,7 @@ export class AIService {
 
       // Make AI request with retry logic
       const completion = await retryWithBackoff(async () => {
-        return await this.client.chat.completions.create({
+        return await this.getClient().chat.completions.create({
           model: model,
           messages: [
             {
@@ -164,8 +170,8 @@ export class AIService {
         categories: parsed.categories || [],
         confidence: parsed.confidence || 0.5,
       };
-    } catch (error) {
-      console.error('Failed to parse AI response:', error);
+    } catch (_error) {
+      console.error('Failed to parse AI response:', _error);
 
       // Return fallback structured response
       return {
@@ -208,7 +214,7 @@ export class AIService {
   // Test AI Connection
   async testConnection(): Promise<boolean> {
     try {
-      const response = await this.client.chat.completions.create({
+      const response = await this.getClient().chat.completions.create({
         model: 'openai/gpt-4o-mini',
         messages: [
           { role: 'user', content: 'Test connection. Respond with "OK".' },
@@ -231,14 +237,14 @@ export class AIService {
       const contextLimit = getModelContextLimit(model);
 
       // Test model availability with a simple request
-      await this.client.chat.completions.create({
+      await this.getClient().chat.completions.create({
         model: model,
         messages: [{ role: 'user', content: 'ping' }],
         max_tokens: 1,
       });
 
       return { available: true, contextLimit };
-    } catch (error) {
+    } catch {
       return { available: false, contextLimit: getModelContextLimit(model) };
     }
   }

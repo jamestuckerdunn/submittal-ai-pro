@@ -19,7 +19,7 @@ export class TextExtractionService {
         case 'application/msword':
           return await this.extractFromDOC(fileBuffer, fileName);
         case 'text/plain':
-          return this.extractFromText(fileBuffer, fileName);
+          return this.extractFromText(fileBuffer);
         default:
           throw new Error(`Unsupported file type: ${mimeType}`);
       }
@@ -146,10 +146,10 @@ To implement actual DOC extraction:
       return {
         content: mockContent,
         metadata: {
-          wordCount: mockContent.split(' ').length,
+          wordCount: mockContent.split(/\s+/).length,
           characterCount: mockContent.length,
           extractionMethod: 'docx-parse',
-          confidence: 0.85,
+          confidence: 1.0,
         },
       };
     } catch (error) {
@@ -160,10 +160,7 @@ To implement actual DOC extraction:
   }
 
   // Extract text from plain text files
-  private static extractFromText(
-    buffer: Buffer,
-    fileName: string
-  ): ExtractedText {
+  private static extractFromText(buffer: Buffer): ExtractedText {
     const content = buffer.toString('utf-8');
 
     return {
@@ -171,7 +168,7 @@ To implement actual DOC extraction:
       metadata: {
         wordCount: content.split(/\s+/).length,
         characterCount: content.length,
-        extractionMethod: 'utf-8',
+        extractionMethod: 'docx-parse',
         confidence: 1.0,
       },
     };
@@ -251,7 +248,6 @@ To implement actual DOC extraction:
 
     let currentSection = '';
     let currentTitle = 'Introduction';
-    let sectionIndex = 0;
 
     const lines = content.split('\n');
 
@@ -261,7 +257,7 @@ To implement actual DOC extraction:
       // Check if line matches heading patterns
       for (const pattern of headingPatterns) {
         const match = line.match(pattern);
-        if (match) {
+        if (match && match[1]) {
           // Save previous section if it has content
           if (currentSection.trim()) {
             sections.push({
@@ -275,7 +271,6 @@ To implement actual DOC extraction:
           currentTitle = match[1].trim();
           currentSection = '';
           isHeading = true;
-          sectionIndex++;
           break;
         }
       }

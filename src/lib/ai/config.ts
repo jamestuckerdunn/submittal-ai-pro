@@ -99,7 +99,14 @@ export function getBestAvailableModel(preferredModel?: AIModel): AIModel {
     return preferredModel;
   }
 
-  return availableModels[0];
+  if (availableModels.length === 0) {
+    throw new AIProcessingError(
+      'No AI models are available',
+      'NO_MODELS_AVAILABLE'
+    );
+  }
+
+  return availableModels[0]!;
 }
 
 // Sleep Utility for Retries
@@ -127,7 +134,7 @@ export async function retryWithBackoff<T>(
   operation: () => Promise<T>,
   config: RetryConfig = DEFAULT_RETRY_CONFIG
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error = new Error('Maximum retries exceeded');
 
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {

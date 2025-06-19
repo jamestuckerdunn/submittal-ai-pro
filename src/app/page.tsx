@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -109,6 +111,22 @@ export default function Home() {
               <span>•</span>
               <span>Stripe</span>
             </div>
+          </div>
+
+          {/* Auth Navigation */}
+          <div className="mt-12 flex justify-center space-x-4">
+            <Link
+              href="/login"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Sign Up
+            </Link>
           </div>
         </div>
       </div>

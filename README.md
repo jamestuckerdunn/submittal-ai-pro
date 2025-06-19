@@ -74,6 +74,12 @@ AI-powered construction submittal review platform that automatically analyzes su
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
+## 🌐 **Live Demo**
+
+**Production URL**: [https://q-5dzlhl6ef-tucker-dunns-projects.vercel.app](https://q-5dzlhl6ef-tucker-dunns-projects.vercel.app)
+
+_Note: The project name shows as "q" due to CLI input, but functionality is complete._
+
 ## 📝 Available Scripts
 
 - `npm run dev` - Start development server with Turbopack

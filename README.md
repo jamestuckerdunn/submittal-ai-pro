@@ -33,7 +33,7 @@ AI-powered construction submittal review platform that automatically analyzes su
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/submittal-ai-pro.git
+       git clone https://github.com/jamestuckerdunn/submittal-ai-pro.git
    cd submittal-ai-pro
    ```
 

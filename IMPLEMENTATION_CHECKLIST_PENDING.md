@@ -1,28 +1,27 @@
 # SubmittalAI Pro - Pending Implementation Tasks
 
-## 🔄 Next Up: Prompt 3 - Supabase Database Setup
+## 🔄 Next Up: Prompt 4 - Authentication System
 
-**Priority**: HIGH - Required for all subsequent features
+**Priority**: HIGH - Core user functionality
 
-### 📋 Pending Tasks for Prompt 3:
+### 📋 Pending Tasks for Prompt 4:
 
-- [ ] Create new Supabase project named "submittal-ai-pro"
-- [ ] Enable email/password authentication in Supabase Auth settings
-- [ ] Create complete database schema with tables:
-  - [ ] `documents` table with user_id, filename, file_type, file_size, storage_path, document_type, uploaded_at, processed_at, status
-  - [ ] `reviews` table with user_id, submittal_id, specification_id, ai_analysis, compliance_score, status, created_at, completed_at
-  - [ ] `subscriptions` table with user_id, stripe_customer_id, stripe_subscription_id, plan_type, status, current_period_start, current_period_end, reviews_used, reviews_limit, created_at, updated_at
-- [ ] Set up Row Level Security (RLS) policies for all tables
-- [ ] Create storage bucket for documents with appropriate security policies
-- [ ] Install Supabase packages: `@supabase/supabase-js @supabase/auth-helpers-nextjs`
-- [ ] Create Supabase client configuration
-- [ ] Add Supabase environment variables to .env.local and Vercel
-- [ ] Test database connection with a simple API route
+- [ ] Create authentication components: LoginForm, SignUpForm, ForgotPasswordForm
+- [ ] Create authentication pages: /login, /signup, /forgot-password, /profile
+- [ ] Implement authentication middleware for protected routes
+- [ ] Create a ProtectedRoute wrapper component
+- [ ] Set up authentication context/provider
+- [ ] Create user profile management functionality
+- [ ] Add proper TypeScript types for all auth components
+- [ ] Test authentication flow: signup, login, logout, password reset
+- [ ] Add loading states and error handling for all auth operations
+- [ ] Style authentication pages with Tailwind CSS
+- [ ] Create tests for authentication components
 - [ ] Commit and deploy changes
 
 ---
 
-## 📋 Remaining Prompts (18/20)
+## 📋 Remaining Prompts (17/20)
 
 ### Phase 1: Foundation & Early Deployment
 

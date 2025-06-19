@@ -8,9 +8,10 @@ CREATE TABLE IF NOT EXISTS documents (
     filename TEXT NOT NULL,
     file_type TEXT NOT NULL,
     file_size BIGINT NOT NULL,
-    storage_path TEXT NOT NULL,
-    document_type TEXT CHECK (document_type IN ('submittal', 'specification')) NOT NULL,
-    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    file_path TEXT NOT NULL,
+    public_url TEXT NOT NULL,
+    category TEXT CHECK (category IN ('submittal', 'specification', 'other')) DEFAULT 'other' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE,
     status TEXT CHECK (status IN ('uploaded', 'processing', 'processed', 'error')) DEFAULT 'uploaded' NOT NULL
 );
@@ -104,7 +105,7 @@ CREATE POLICY "Users can delete own files" ON storage.objects
 -- Create indexes for better performance
 CREATE INDEX idx_documents_user_id ON documents(user_id);
 CREATE INDEX idx_documents_status ON documents(status);
-CREATE INDEX idx_documents_type ON documents(document_type);
+CREATE INDEX idx_documents_category ON documents(category);
 CREATE INDEX idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX idx_reviews_status ON reviews(status);
 CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);

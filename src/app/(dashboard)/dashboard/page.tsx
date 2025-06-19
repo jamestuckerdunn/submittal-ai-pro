@@ -14,6 +14,7 @@ import {
   Upload,
   Brain,
   Shield,
+  FolderOpen,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -22,7 +23,7 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push('/');
+    router.push('/login');
   };
 
   return (
@@ -107,33 +108,40 @@ export default function DashboardPage() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" size="lg" asChild>
-                    <div className="flex items-center">
-                      <Upload className="h-5 w-5 mr-3" />
-                      Upload Documents
-                    </div>
+                  <Button
+                    className="w-full justify-start"
+                    size="lg"
+                    onClick={() => router.push('/files')}
+                  >
+                    <Upload className="h-5 w-5 mr-3" />
+                    Upload Documents
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full justify-start"
                     size="lg"
-                    asChild
+                    onClick={() => router.push('/files')}
                   >
-                    <div className="flex items-center">
-                      <Brain className="h-5 w-5 mr-3" />
-                      Start AI Review
-                    </div>
+                    <FolderOpen className="h-5 w-5 mr-3" />
+                    Manage Files
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full justify-start"
                     size="lg"
-                    asChild
+                    disabled
                   >
-                    <div className="flex items-center">
-                      <Download className="h-5 w-5 mr-3" />
-                      Export Reports
-                    </div>
+                    <Brain className="h-5 w-5 mr-3" />
+                    Start AI Review (Coming Soon)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    size="lg"
+                    disabled
+                  >
+                    <Download className="h-5 w-5 mr-3" />
+                    Export Reports (Coming Soon)
                   </Button>
                 </CardContent>
               </Card>
@@ -166,12 +174,12 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                      Authentication Complete!
+                      File Upload System Complete!
                     </h3>
                     <p className="text-sm text-blue-700 dark:text-blue-200 mt-1">
-                      Your account is set up and ready. File upload and AI
-                      processing features are coming next in our development
-                      roadmap.
+                      You can now upload construction documents and manage your
+                      files. AI processing and review features are coming next
+                      in our development roadmap.
                     </p>
                   </div>
                 </div>

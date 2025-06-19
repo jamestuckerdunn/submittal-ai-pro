@@ -2,189 +2,158 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
-interface LoginFormProps {
-  onSubmit: (email: string, password: string) => Promise<void>;
-  loading?: boolean;
-  error?: string;
-}
+const LoginForm: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-export const LoginForm: React.FC<LoginFormProps> = ({
-  onSubmit,
-  loading = false,
-  error,
-}) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.password) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+  const { signIn } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
-    if (!validateForm()) {
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
       return;
     }
 
-    await onSubmit(formData.email, formData.password);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-
-    // Clear error when user starts typing
-    if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    try {
+      const result = await signIn(email, password);
+      if (result.success) {
+        router.push('/dashboard');
+      } else {
+        setError(result.error || 'Login failed');
+      }
+    } catch {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-white shadow-lg rounded-lg p-8">
-        <div className="text-center mb-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">SA</span>
+            </div>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="mt-2 text-muted-foreground">
             Sign in to your SubmittalAI Pro account
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Email Address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.email ? 'border-red-300' : 'border-gray-300'
-              }`}
-              placeholder="Enter your email"
-              disabled={loading}
-            />
-            {formErrors.email && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={formData.password}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.password ? 'border-red-300' : 'border-gray-300'
-              }`}
-              placeholder="Enter your password"
-              disabled={loading}
-            />
-            {formErrors.password && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              Forgot your password?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-              loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-            }`}
-          >
-            {loading ? (
-              <div className="flex items-center">
-                <div className="animate-spin -ml-1 mr-3 h-5 w-5 text-white">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">Sign In</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+                  {error}
                 </div>
-                Signing In...
-              </div>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
+              )}
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/signup"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Sign up now
-            </Link>
-          </p>
-        </div>
+              <div className="space-y-4">
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="pl-10"
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    disabled={isLoading}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+                size="lg"
+              >
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Don&apos;t have an account?{' '}
+                <Link
+                  href="/signup"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                >
+                  Sign up
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
+
+export { LoginForm };

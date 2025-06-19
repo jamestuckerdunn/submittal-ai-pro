@@ -187,4 +187,84 @@ export async function checkOpenRouterHealth(): Promise<boolean> {
   }
 }
 
+// Rate Limiting Configuration
+export interface RateLimitConfig {
+  maxRequestsPerMinute: number;
+  maxRequestsPerHour: number;
+  maxRequestsPerDay: number;
+  costLimitPerDay: number; // in USD
+}
+
+export const DEFAULT_RATE_LIMITS: RateLimitConfig = {
+  maxRequestsPerMinute: 10,
+  maxRequestsPerHour: 100,
+  maxRequestsPerDay: 500,
+  costLimitPerDay: 50.0, // $50 per day limit
+};
+
+// Cost Monitoring
+export interface CostMonitor {
+  dailyCost: number;
+  monthlyCost: number;
+  requestCount: number;
+  lastResetDate: string;
+}
+
+// Rate Limiting Check
+export function checkRateLimit(
+  requestCount: number,
+  timeWindow: 'minute' | 'hour' | 'day',
+  limits: RateLimitConfig = DEFAULT_RATE_LIMITS
+): boolean {
+  switch (timeWindow) {
+    case 'minute':
+      return requestCount < limits.maxRequestsPerMinute;
+    case 'hour':
+      return requestCount < limits.maxRequestsPerHour;
+    case 'day':
+      return requestCount < limits.maxRequestsPerDay;
+    default:
+      return false;
+  }
+}
+
+// Cost Monitoring Check
+export function checkCostLimit(
+  currentCost: number,
+  limits: RateLimitConfig = DEFAULT_RATE_LIMITS
+): boolean {
+  return currentCost < limits.costLimitPerDay;
+}
+
+// Usage Analytics
+export interface UsageAnalytics {
+  totalRequests: number;
+  totalCost: number;
+  averageResponseTime: number;
+  successRate: number;
+  modelUsage: Record<AIModel, number>;
+  errorTypes: Record<string, number>;
+}
+
+// Log AI Usage for Analytics
+export function logAIUsage(
+  model: AIModel,
+  tokensUsed: number,
+  cost: number,
+  processingTime: number,
+  success: boolean,
+  errorType?: string
+): void {
+  // This would typically write to a database or analytics service
+  console.log('AI Usage:', {
+    model,
+    tokensUsed,
+    cost,
+    processingTime,
+    success,
+    errorType,
+    timestamp: new Date().toISOString(),
+  });
+}
+
 export { OPENROUTER_CONFIG };

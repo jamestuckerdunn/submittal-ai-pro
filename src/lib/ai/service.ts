@@ -6,6 +6,7 @@ import {
   calculateTokenCost,
   retryWithBackoff,
   getModelContextLimit,
+  logAIUsage,
 } from './config';
 import {
   DocumentAnalysisRequest,
@@ -39,6 +40,14 @@ export class AIService {
     const analysisId = this.generateAnalysisId();
 
     try {
+      // TODO: Implement actual rate limiting checks with database/cache
+      // For now, we'll log the attempt but not enforce limits
+      console.log('AI Request:', {
+        analysisId,
+        userId: request.documentId,
+        timestamp: new Date().toISOString(),
+      });
+
       // Select best available model
       const model = getBestAvailableModel(options.model);
 
@@ -88,6 +97,9 @@ export class AIService {
         completion.choices[0]?.message?.content || ''
       );
 
+      // Log usage for analytics
+      logAIUsage(model, tokensUsed, cost, processingTime, true);
+
       return {
         success: true,
         analysisId,
@@ -100,13 +112,26 @@ export class AIService {
     } catch (error) {
       console.error('AI analysis failed:', error);
 
+      const processingTime = Date.now() - startTime;
+      const model = options.model || getBestAvailableModel();
+
+      // Log failed usage for analytics
+      logAIUsage(
+        model,
+        0,
+        0,
+        processingTime,
+        false,
+        error instanceof Error ? error.constructor.name : 'UnknownError'
+      );
+
       return {
         success: false,
         analysisId,
-        model: options.model || getBestAvailableModel(),
+        model,
         tokensUsed: 0,
         cost: 0,
-        processingTime: Date.now() - startTime,
+        processingTime,
         error:
           error instanceof Error ? error.message : 'Unknown error occurred',
       };

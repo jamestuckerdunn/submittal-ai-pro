@@ -16,8 +16,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import {
   FileText,
-  Image,
   File,
+  Image as ImageIcon,
   Trash2,
   Download,
   AlertCircle,
@@ -74,7 +74,7 @@ export default function FilesPage() {
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/'))
-      return <Image className="h-5 w-5" aria-hidden="true" />;
+      return <ImageIcon className="h-5 w-5" aria-hidden="true" />;
     if (fileType === 'application/pdf' || fileType.includes('document'))
       return <FileText className="h-5 w-5" aria-hidden="true" />;
     return <File className="h-5 w-5" aria-hidden="true" />;

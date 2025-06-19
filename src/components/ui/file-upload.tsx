@@ -9,7 +9,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import {
   Upload,
   File,
-  Image,
+  Image as ImageIcon,
   X,
   AlertCircle,
   CheckCircle,
@@ -210,7 +210,7 @@ export function FileUpload({
     const fileCategory = getFileCategory(file);
     switch (fileCategory) {
       case 'image':
-        return <Image className="h-4 w-4" aria-hidden="true" />;
+        return <ImageIcon className="h-4 w-4" aria-hidden="true" />;
       case 'document':
         return <FileText className="h-4 w-4" />;
       default:

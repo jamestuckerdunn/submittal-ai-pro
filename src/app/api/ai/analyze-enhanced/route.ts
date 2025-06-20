@@ -1,21 +1,30 @@
-// AI Document Analysis API Route
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { AIService } from '@/lib/ai/service';
-import { DocumentAnalysisRequest } from '@/lib/types/ai';
+import {
+  EnhancedAnalysisRequest,
+  AnalysisType,
+  AnalysisComplexity,
+  AnalysisPriority,
+  ProjectContext,
+} from '@/lib/types/ai';
 
 const aiService = new AIService();
 
-// POST /api/ai/analyze
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
       documentId,
       analysisType = 'review',
-      customPrompt,
-      comparisonDocumentId,
+      complexity = 'standard',
+      priority = 'normal',
+      projectContext,
+      focusAreas,
+      excludeAreas,
+      customCriteria,
+      comparisonDocuments,
+      analysisScope,
     } = body;
 
     if (!documentId) {
@@ -64,19 +73,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use standard analysis
-    const standardRequest: DocumentAnalysisRequest = {
+    // Prepare enhanced analysis request
+    const enhancedRequest: EnhancedAnalysisRequest = {
       documentId: document.id,
       fileName: document.filename,
       documentType: document.file_type,
       extractedText: document.extracted_text,
-      analysisType: analysisType,
-      customPrompt,
-      comparisonDocumentId,
+      analysisType: analysisType as AnalysisType,
+      complexity: complexity as AnalysisComplexity,
+      priority: priority as AnalysisPriority,
+      focusAreas,
+      excludeAreas,
+      customCriteria,
+      comparisonDocuments,
+      projectContext: projectContext as ProjectContext,
+      analysisScope,
     };
 
-    // Perform standard AI analysis
-    const analysisResult = await aiService.analyzeDocument(standardRequest);
+    // Perform enhanced AI analysis
+    const analysisResult =
+      await aiService.analyzeDocumentEnhanced(enhancedRequest);
 
     if (!analysisResult.success) {
       return NextResponse.json(
@@ -85,14 +101,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store standard analysis result in database
+    // Store enhanced analysis result in database
     const { error: insertError } = await supabase.from('reviews').insert({
       user_id: user.id,
       submittal_id: document.id,
       specification_id: document.id,
       ai_analysis: {
-        enhanced: false,
-        result: analysisResult.result,
+        enhanced: true,
+        complexity,
+        priority,
+        result: analysisResult.enhancedResult,
         metadata: {
           model: analysisResult.model,
           tokensUsed: analysisResult.tokensUsed,
@@ -100,12 +118,12 @@ export async function POST(request: NextRequest) {
           processingTime: analysisResult.processingTime,
         },
       },
-      compliance_score: analysisResult.result?.complianceScore || 0,
+      compliance_score: analysisResult.enhancedResult?.complianceScore || 0,
       status: 'completed',
     });
 
     if (insertError) {
-      console.error('Failed to store analysis result:', insertError);
+      console.error('Failed to store enhanced analysis result:', insertError);
       return NextResponse.json(
         { error: 'Failed to store analysis result' },
         { status: 500 }
@@ -115,17 +133,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       analysisId: analysisResult.analysisId,
-      result: analysisResult.result,
+      result: analysisResult.enhancedResult,
       metadata: {
         model: analysisResult.model,
         tokensUsed: analysisResult.tokensUsed,
         cost: analysisResult.cost,
         processingTime: analysisResult.processingTime,
-        enhanced: false,
+        enhanced: true,
       },
     });
   } catch (error) {
-    console.error('AI analysis API error:', error);
+    console.error('Enhanced AI analysis API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -133,11 +151,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/ai/analyze (for testing)
 export async function GET() {
   return NextResponse.json({
-    message: 'AI Analysis API is running',
+    message: 'Enhanced AI Analysis API is running',
     status: 'healthy',
     timestamp: new Date().toISOString(),
+    features: [
+      'Multi-level analysis complexity',
+      'Priority-based processing',
+      'Project context integration',
+      'Advanced prompt templates',
+      'Comprehensive result structure',
+    ],
   });
 }

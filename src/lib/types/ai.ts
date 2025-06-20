@@ -331,7 +331,7 @@ export interface AnalysisMetadata {
   processingTime: number;
   confidenceScore: number;
   completenessScore: number;
-  reviewerNotes?: string;
+  reviewerNotes?: string | null;
 }
 
 // Detailed Finding

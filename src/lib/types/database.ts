@@ -121,3 +121,86 @@ export interface Database {
     };
   };
 }
+
+// Type aliases for convenience
+export type Document = Database['public']['Tables']['documents']['Row'];
+export type DocumentInsert =
+  Database['public']['Tables']['documents']['Insert'];
+export type DocumentUpdate =
+  Database['public']['Tables']['documents']['Update'];
+
+export type Review = Database['public']['Tables']['reviews']['Row'];
+export type ReviewInsert = Database['public']['Tables']['reviews']['Insert'];
+export type ReviewUpdate = Database['public']['Tables']['reviews']['Update'];
+
+export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
+export type SubscriptionInsert =
+  Database['public']['Tables']['subscriptions']['Insert'];
+export type SubscriptionUpdate =
+  Database['public']['Tables']['subscriptions']['Update'];
+
+// Document Processing Types
+export interface DocumentMetadata {
+  fileType: string;
+  fileName: string;
+  fileSize: number;
+  processingTime: number;
+  wordCount: number;
+  characterCount: number;
+  pageCount?: number;
+  extractionMethod: string;
+  processingVersion?: string;
+  lastProcessed?: string;
+}
+
+export interface ProcessedDocument {
+  id: string;
+  user_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  storage_path: string;
+  document_type: 'submittal' | 'specification';
+  uploaded_at: string;
+  processed_at?: string | null | undefined;
+  status: 'uploaded' | 'processing' | 'processed' | 'error';
+  extracted_text?: string | undefined;
+  metadata?: DocumentMetadata | undefined;
+  processing_status?:
+    | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | undefined;
+  processing_error?: string | undefined;
+}
+
+// Document Processing Queue Types
+export interface DocumentProcessingJob {
+  id: string;
+  documentId: string;
+  userId: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  message: string;
+  startedAt: Date;
+  completedAt?: Date;
+  estimatedDuration?: number;
+  priority: 'low' | 'normal' | 'high';
+  retryCount: number;
+  maxRetries: number;
+}
+
+// Batch Processing Types
+export interface BatchProcessingJob {
+  id: string;
+  userId: string;
+  documentIds: string[];
+  status: 'queued' | 'processing' | 'completed' | 'failed' | 'partial';
+  totalDocuments: number;
+  processedDocuments: number;
+  failedDocuments: number;
+  startedAt: Date;
+  completedAt?: Date;
+  results: Record<string, 'success' | 'failed'>;
+}

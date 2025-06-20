@@ -1,6 +1,8 @@
 // Document Text Extraction Utilities for SubmittalAI Pro
 
 import { ExtractedText, TextSection } from '@/lib/types/ai';
+import mammoth from 'mammoth';
+import sharp from 'sharp';
 
 // Text Extraction Service
 export class TextExtractionService {
@@ -300,4 +302,256 @@ To implement actual DOC extraction:
 
     return sections;
   }
+}
+
+// Enhanced Document Text Extraction Service for SubmittalAI Pro
+
+// PDF Text Extraction Implementation
+export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  try {
+    // Dynamic import to avoid build-time issues with pdf-parse
+    const pdfParse = (await import('pdf-parse')).default;
+    const data = await pdfParse(buffer);
+    return data.text;
+  } catch (error) {
+    console.error('PDF text extraction error:', error);
+    throw new Error(
+      `Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+// Word Document Text Extraction Implementation
+export async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
+  try {
+    const result = await mammoth.extractRawText({ buffer });
+
+    if (result.messages && result.messages.length > 0) {
+      console.warn('DOCX extraction warnings:', result.messages);
+    }
+
+    return result.value || '';
+  } catch (error) {
+    console.error('DOCX text extraction error:', error);
+    throw new Error(
+      `Failed to extract text from DOCX: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+// Legacy DOC files - placeholder for future implementation
+export async function extractTextFromDOC(buffer: Buffer): Promise<string> {
+  // Note: For now, we'll return an error message
+  // In production, you might want to use a service like textract or convert to DOCX first
+  console.log(
+    `DOC processing not implemented for buffer size: ${buffer.length}`
+  );
+  throw new Error(
+    'DOC file processing not yet implemented. Please convert to DOCX format.'
+  );
+}
+
+// Image Text Recognition (OCR) - placeholder for future implementation
+export async function extractTextFromImage(
+  buffer: Buffer,
+  mimeType: string
+): Promise<string> {
+  try {
+    // For now, we'll return basic image metadata
+    const metadata = await sharp(buffer).metadata();
+
+    return `Image detected: ${metadata.width}x${metadata.height} pixels, format: ${metadata.format}, type: ${mimeType}
+    
+Note: OCR text extraction from images is not yet implemented. 
+Please consider using a dedicated OCR service or converting images to text manually.`;
+  } catch (error) {
+    console.error('Image processing error:', error);
+    throw new Error(
+      `Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+// Plain Text Extraction
+export async function extractTextFromPlainText(
+  buffer: Buffer
+): Promise<string> {
+  try {
+    return buffer.toString('utf-8');
+  } catch (error) {
+    console.error('Plain text extraction error:', error);
+    throw new Error(
+      `Failed to extract plain text: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+// Main Document Processing Service
+export interface DocumentProcessingResult {
+  extractedText: string;
+  metadata: {
+    fileType: string;
+    fileName: string;
+    fileSize: number;
+    processingTime: number;
+    wordCount: number;
+    characterCount: number;
+    pageCount?: number | undefined;
+    extractionMethod: string;
+  };
+  status: 'success' | 'partial' | 'failed';
+  warnings?: string[] | undefined;
+  errors?: string[] | undefined;
+}
+
+export async function processDocument(
+  buffer: Buffer,
+  fileName: string,
+  mimeType: string
+): Promise<DocumentProcessingResult> {
+  const startTime = Date.now();
+  const warnings: string[] = [];
+  const errors: string[] = [];
+
+  try {
+    let extractedText = '';
+    let extractionMethod = '';
+    let pageCount: number | undefined;
+
+    // Determine extraction method based on MIME type
+    if (mimeType === 'application/pdf') {
+      extractedText = await extractTextFromPDF(buffer);
+      extractionMethod = 'pdf-parse';
+    } else if (
+      mimeType ===
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      extractedText = await extractTextFromDOCX(buffer);
+      extractionMethod = 'mammoth';
+    } else if (mimeType === 'application/msword') {
+      try {
+        extractedText = await extractTextFromDOC(buffer);
+        extractionMethod = 'doc-parser';
+      } catch (error) {
+        errors.push(
+          `DOC processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+        extractedText = `[DOC file detected but processing failed. Please convert to DOCX format for better results.]`;
+        extractionMethod = 'fallback';
+      }
+    } else if (mimeType.startsWith('image/')) {
+      try {
+        extractedText = await extractTextFromImage(buffer, mimeType);
+        extractionMethod = 'image-metadata';
+        warnings.push('OCR text extraction from images is not yet implemented');
+      } catch (error) {
+        errors.push(
+          `Image processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+        extractedText = '[Image file detected but processing failed]';
+        extractionMethod = 'fallback';
+      }
+    } else if (mimeType.startsWith('text/')) {
+      extractedText = await extractTextFromPlainText(buffer);
+      extractionMethod = 'plain-text';
+    } else {
+      throw new Error(`Unsupported file type: ${mimeType}`);
+    }
+
+    // Calculate metadata
+    const processingTime = Date.now() - startTime;
+    const wordCount = extractedText
+      .split(/\s+/)
+      .filter(word => word.length > 0).length;
+    const characterCount = extractedText.length;
+
+    // Estimate page count for text-based content
+    if (extractionMethod !== 'image-metadata') {
+      pageCount = Math.max(1, Math.ceil(wordCount / 500)); // Rough estimate: 500 words per page
+    }
+
+    const status: 'success' | 'partial' | 'failed' =
+      errors.length > 0 ? 'partial' : 'success';
+
+    return {
+      extractedText,
+      metadata: {
+        fileType: mimeType,
+        fileName,
+        fileSize: buffer.length,
+        processingTime,
+        wordCount,
+        characterCount,
+        ...(pageCount !== undefined && { pageCount }),
+        extractionMethod,
+      },
+      status,
+      warnings: warnings.length > 0 ? warnings : undefined,
+      errors: errors.length > 0 ? errors : undefined,
+    };
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+
+    return {
+      extractedText: '',
+      metadata: {
+        fileType: mimeType,
+        fileName,
+        fileSize: buffer.length,
+        processingTime,
+        wordCount: 0,
+        characterCount: 0,
+        extractionMethod: 'failed',
+      },
+      status: 'failed',
+      errors: [
+        `Document processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ],
+    };
+  }
+}
+
+// Document Processing Queue Status
+export interface ProcessingStatus {
+  id: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  message: string;
+  startedAt: Date;
+  completedAt?: Date;
+  result?: DocumentProcessingResult;
+  error?: string;
+}
+
+// In-memory processing queue (in production, use Redis or database)
+const processingQueue = new Map<string, ProcessingStatus>();
+
+export function getProcessingStatus(id: string): ProcessingStatus | null {
+  return processingQueue.get(id) || null;
+}
+
+export function updateProcessingStatus(
+  id: string,
+  updates: Partial<ProcessingStatus>
+): void {
+  const current = processingQueue.get(id);
+  if (current) {
+    processingQueue.set(id, { ...current, ...updates });
+  }
+}
+
+export function createProcessingJob(
+  id: string,
+  fileName: string
+): ProcessingStatus {
+  const status: ProcessingStatus = {
+    id,
+    status: 'queued',
+    progress: 0,
+    message: `Queued for processing: ${fileName}`,
+    startedAt: new Date(),
+  };
+
+  processingQueue.set(id, status);
+  return status;
 }

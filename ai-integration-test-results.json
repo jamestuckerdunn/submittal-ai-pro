@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-06-20T00:52:12.243Z",
+  "summary": {
+    "passed": 0,
+    "failed": 9,
+    "successRate": "0.0"
+  },
+  "errors": [
+    {
+      "testName": "Basic Analyze Endpoint Health",
+      "details": "Status: undefined, Error: fetch failed"
+    },
+    {
+      "testName": "Enhanced Analyze Endpoint Health",
+      "details": "Status: undefined, Error: fetch failed"
+    },
+    {
+      "testName": "Basic Analysis Request",
+      "details": "Error: fetch failed"
+    },
+    {
+      "testName": "Enhanced Analysis Request",
+      "details": "Error: fetch failed"
+    },
+    {
+      "testName": "Missing Document ID Error",
+      "details": "Should reject requests without document ID"
+    },
+    {
+      "testName": "Invalid Analysis Type Handling",
+      "details": "Should handle invalid analysis types gracefully"
+    },
+    {
+      "testName": "Authentication Requirement",
+      "details": "Should require authentication for AI analysis"
+    },
+    {
+      "testName": "Model Selection Logic",
+      "details": "Could not test model selection"
+    },
+    {
+      "testName": "Rate Limiting Response",
+      "details": "All requests failed - check API availability"
+    }
+  ]
+}

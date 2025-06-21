@@ -14,21 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SubmittalAI Pro - Coming Soon',
+  title: 'Compliance Manager Pro',
   description:
-    'AI-powered construction submittal review platform. Automatically analyze submittals against project specifications, reducing review time from days to minutes.',
+    'Construction compliance management platform for verifying insurance and compliance documents for subcontractors and vendors.',
   keywords: [
     'construction',
-    'submittal',
-    'AI',
-    'review',
     'compliance',
-    'specifications',
+    'insurance',
+    'certificates',
+    'subcontractors',
+    'vendors',
   ],
-  authors: [{ name: 'SubmittalAI Pro' }],
+  authors: [{ name: 'Compliance Manager Pro' }],
   openGraph: {
-    title: 'SubmittalAI Pro - Coming Soon',
-    description: 'AI-powered construction submittal review platform',
+    title: 'Compliance Manager Pro',
+    description: 'Construction compliance management platform',
     type: 'website',
   },
 };

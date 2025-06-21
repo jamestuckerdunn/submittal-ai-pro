@@ -19,9 +19,9 @@ const Header: React.FC = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', protected: true },
-    { name: 'Files', href: '/files', protected: true },
-    { name: 'Reviews', href: '/reviews', protected: true },
-    { name: 'Pricing', href: '/pricing', protected: false },
+    { name: 'Projects', href: '/projects', protected: true },
+    { name: 'Compliance Profiles', href: '/compliance-profiles', protected: true },
+    { name: 'Settings', href: '/settings', protected: true },
   ];
 
   const visibleNavigation = navigation.filter(item => !item.protected || user);
@@ -34,10 +34,10 @@ const Header: React.FC = () => {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SA</span>
+                <span className="text-white font-bold text-sm">CM</span>
               </div>
               <span className="hidden font-bold text-xl sm:inline-block">
-                SubmittalAI Pro
+                Compliance Manager Pro
               </span>
             </Link>
           </div>
